@@ -1,0 +1,26 @@
+_display_information:
+  name: SlackAdder
+features:
+  bot_user:
+    display_name: SlackAdder
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - channels:manage
+      - channels:read
+      - channels:join
+      - groups:read
+      - groups:write
+      - users:read
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+  interactivity:
+    is_enabled: false
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false

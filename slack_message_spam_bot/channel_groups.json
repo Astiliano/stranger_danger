@@ -1,0 +1,14 @@
+{
+  "default": {
+    "description": "Core team channels everyone joins by default.",
+    "channels": ["#general", "#ops", "#social"]
+  },
+  "customers": {
+    "description": "Customer-facing support and success rooms.",
+    "channels": ["#customer-support", "#customer-chatter", "C12345678"]
+  },
+  "engineering": {
+    "description": "Engineering collaboration spaces for incidents and releases.",
+    "channels": ["#eng-general", "#eng-incidents", "#release-war-room"]
+  }
+}
