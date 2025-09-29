@@ -1,7 +1,7 @@
 {
   "default": {
     "description": "Core team channels everyone joins by default.",
-    "channels": ["#general", "#ops", "#social"]
+    "channels": ["#general", "#social"]
   },
   "customers": {
     "description": "Customer-facing support and success rooms.",

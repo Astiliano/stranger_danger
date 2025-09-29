@@ -1,4 +1,4 @@
-_display_information:
+display_information:
   name: SlackAdder
 features:
   bot_user:
@@ -14,6 +14,7 @@ oauth_config:
       - channels:join
       - groups:read
       - groups:write
+      - files:read
       - users:read
 settings:
   event_subscriptions:

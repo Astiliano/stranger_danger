@@ -24,7 +24,7 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
 ## Create the Slack App
 
 1. Go to [api.slack.com/apps](https://api.slack.com/apps) and click **Create New App ➜ From manifest**.
-2. Paste the contents of `slack_app_manifest.yaml`, choose your workspace, and create the app (scopes: `app_mentions:read`, `chat:write`, `channels:manage`, `channels:read`, `channels:join`, `groups:read`, `groups:write`, `users:read`).
+2. Paste the contents of `slack_app_manifest.yaml`, choose your workspace, and create the app (scopes: `app_mentions:read`, `chat:write`, `channels:manage`, `channels:read`, `channels:join`, `groups:read`, `groups:write`, `files:read`, `users:read`).
 3. Under **OAuth & Permissions**, install the app to your workspace. Keep the **Bot User OAuth Token** (`xoxb-…`).
 4. Under **Settings ➜ Basic Information**, generate an **App-Level Token** with scope `connections:write` for Socket Mode (`xapp-…`).
 
@@ -35,7 +35,7 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
    - `SLACK_BOT_TOKEN` with the `xoxb-…` token.
    - `SLACK_APP_TOKEN` with the `xapp-…` token (required for Socket Mode).
    - Optional: `CHANNEL_GROUPS_FILE` if you store groups elsewhere.
-   - Optional: `ALLOWED_USERS=U123ABC,U456DEF` to whitelist specific users. **If the app runs at the org level (Enterprise Grid), this is required.**
+   - Optional: `ALLOWED_USERS=U123ABC,U456DEF` to whitelist specific users. **If the app runs at the org level (Enterprise Grid), this is required.** When set, the `help` command shows who is allowed.
 3. Edit `channel_groups.json` to match your channel groups (names, descriptions, channel IDs/names).
    ```json
    {
@@ -51,15 +51,19 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
    ```
    - Keys are case-insensitive when you reference them in Slack (`@SlackAdder add … default`).
    - Channel entries can be `#names`, raw IDs (`C…`/`G…`), or a mix.
+   - Keep the JSON valid; comments or trailing commas will cause the bot to stop with a clear error.
+   - You can attach UTF-8 text files to `add` commands; tokens inside are treated as additional channel IDs/names or group keys.
 
 ## Run the Bot
 
 1. In Command Prompt or PowerShell, change into the project directory.
 2. Run: `python vevn_bot_run.py`
    - The script ensures `.env` is populated, creates/updates the `slack_adder_env` virtual environment, installs packages from `requirements.txt`, and launches the bot.
+   - Startup prints a system check (API tokens, scopes, bot identity, channel_groups.json status).
 3. Keep the process running. Mention the bot inside Slack to run commands from any standard workspace channel:
    - `@SlackAdder list` ➜ lists all channel groups with descriptions.
    - `@SlackAdder add @TargetBot customers #extra-channel` ➜ invites `@TargetBot` to all resolved channels (shared/external channels are allowed as invite targets).
+      - Attach UTF-8 text files to supply additional channel/group tokens (whitespace-separated).
    - `@SlackAdder help` ➜ prints usage details.
    - Only full workspace members can trigger commands; guests and DMs/shared channels are ignored for command invocation. Replies appear as threaded responses to keep channels tidy.
 
