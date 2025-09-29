@@ -2,6 +2,8 @@
 
 SlackAdder is a Slack bot that listens for mention commands and invites the specified bot/user to a set of channels (individual channel IDs, `#channel` names, or predefined channel groups sourced from `channel_groups.json`). It can auto-join public channels before inviting the target bot, and reports any Slack API errors it encounters.
 
+Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklist.
+
 ## Prerequisites
 
 1. **Python 3.10 or newer**
@@ -58,7 +60,7 @@ SlackAdder is a Slack bot that listens for mention commands and invites the spec
    - `@SlackAdder list` ➜ lists all channel groups with descriptions.
    - `@SlackAdder add @TargetBot customers #extra-channel` ➜ invites `@TargetBot` to all resolved channels (shared/external channels are allowed as invite targets).
    - `@SlackAdder help` ➜ prints usage details.
-   - Only full workspace members can trigger commands; guests and DMs/shared channels are ignored for command invocation.
+   - Only full workspace members can trigger commands; guests and DMs/shared channels are ignored for command invocation. Replies appear as threaded responses to keep channels tidy.
 
 ## Troubleshooting
 

@@ -428,31 +428,58 @@ def _invite_bot_to_channels(target_bot: str, channel_ids: List[str]) -> List[str
     return results
 
 
+def _send_batched_messages(say, lines: List[str], thread_ts: Optional[str]) -> None:
+    if not lines:
+        return
+
+    batch: List[str] = []
+    char_count = 0
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if char_count + len(line) + 1 > 3500 or len(batch) >= 40:
+            say("\n".join(batch), thread_ts=thread_ts)
+            batch = []
+            char_count = 0
+        batch.append(line)
+        char_count += len(line) + 1
+    if batch:
+        say("\n".join(batch), thread_ts=thread_ts)
+
+
 @app.event("app_mention")
 def handle_app_mention(body, say):  # type: ignore[override]
     event = body.get("event", {})
     text = event.get("text", "")
     user_id = event.get("user")
     channel_id = event.get("channel")
+    thread_ts = event.get("thread_ts") or event.get("ts")
 
     if not user_id or not channel_id:
-        say("Unable to process request: missing user or channel info.")
+        say("Unable to process request: missing user or channel info.", thread_ts=thread_ts)
         return
 
     is_guest, guest_error_message = _is_guest_user(user_id)
     if is_guest:
-        say(guest_error_message or "Sorry, SlackAdder can only be used by full workspace members.")
+        say(
+            guest_error_message or "Sorry, SlackAdder can only be used by full workspace members.",
+            thread_ts=thread_ts,
+        )
         return
 
     is_external_command_channel, channel_error_message = _is_external_channel(channel_id)
     if is_external_command_channel:
-        say(channel_error_message or "Sorry, SlackAdder cannot be used in shared or external channels.")
+        say(
+            channel_error_message or "Sorry, SlackAdder cannot be used in shared or external channels.",
+            thread_ts=thread_ts,
+        )
         return
 
     try:
         command, args = _parse_command_text(text)
     except ValueError as error:
-        say(str(error) + "\n" + USAGE_HELP)
+        say(str(error) + "\n" + USAGE_HELP, thread_ts=thread_ts)
         return
 
     if command in {"", "help"}:
@@ -463,15 +490,15 @@ def handle_app_mention(body, say):  # type: ignore[override]
         try:
             channel_groups, descriptions, display_names = _load_channel_groups()
         except ValueError as error:
-            say(str(error))
+            say(str(error), thread_ts=thread_ts)
             return
 
         if args:
-            say("The `list` command does not take any additional arguments.")
+            say("The `list` command does not take any additional arguments.", thread_ts=thread_ts)
             return
 
         if not display_names:
-            say("No channel groups defined in channel_groups.json.")
+            say("No channel groups defined in channel_groups.json.", thread_ts=thread_ts)
             return
 
         lines: List[str] = []
@@ -479,27 +506,27 @@ def handle_app_mention(body, say):  # type: ignore[override]
             display_name = display_names[key]
             description = descriptions.get(key, "").strip() or "(no description provided)"
             lines.append(f"*{display_name}*: {description}")
-        say("\n".join(lines))
+        _send_batched_messages(say, lines, thread_ts)
         return
 
     if command == "add":
         try:
             channel_groups, _descriptions, _display_names = _load_channel_groups()
         except ValueError as error:
-            say(str(error))
+            say(str(error), thread_ts=thread_ts)
             return
 
         try:
             target_bot, channel_ids = _parse_add_arguments(args, channel_groups)
         except ValueError as error:
-            say(str(error) + "\n" + USAGE_HELP)
+            say(str(error) + "\n" + USAGE_HELP, thread_ts=thread_ts)
             return
 
         feedback = _invite_bot_to_channels(target_bot, channel_ids)
-        say("\n".join(feedback))
+        _send_batched_messages(say, feedback, thread_ts)
         return
 
-    say(f"Unknown command '{command}'.\n" + USAGE_HELP)
+    say(f"Unknown command '{command}'.\n" + USAGE_HELP, thread_ts=thread_ts)
 
 
 def main() -> None:
