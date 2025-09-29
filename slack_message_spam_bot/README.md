@@ -62,6 +62,9 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
    - `@SlackAdder help` ➜ prints usage details.
    - Only full workspace members can trigger commands; guests and DMs/shared channels are ignored for command invocation. Replies appear as threaded responses to keep channels tidy.
 
+  <img width="551" height="554" alt="image" src="https://github.com/user-attachments/assets/935773f7-ef55-47f7-8498-b4d7354fcc4f" />
+
+
 ## Troubleshooting
 
 - `not_in_channel` or `cant_invite` ➜ ensure SlackAdder and the target bot are allowed in the channel (private channels require manual invites and adequate permissions).
