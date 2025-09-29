@@ -35,6 +35,7 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
    - `SLACK_BOT_TOKEN` with the `xoxb-…` token.
    - `SLACK_APP_TOKEN` with the `xapp-…` token (required for Socket Mode).
    - Optional: `CHANNEL_GROUPS_FILE` if you store groups elsewhere.
+   - Optional: `ALLOWED_USERS=U123ABC,U456DEF` to whitelist specific users. **If the app runs at the org level (Enterprise Grid), this is required.**
 3. Edit `channel_groups.json` to match your channel groups (names, descriptions, channel IDs/names).
    ```json
    {
@@ -71,6 +72,7 @@ Looking for a fast path? See `SIMPLE_README.md` for the condensed setup checklis
 - `cant_invite` on shared Slack Connect channels ➜ the workspace owner must allow the target app/user in that channel first; Slack’s admin policies override API invites.
 - `missing_scope` ➜ reinstall the app after updating `slack_app_manifest.yaml` so new scopes take effect.
 - `workspace members only` / `shared channel` guidance ➜ move to a standard, non-shared channel and ensure you’re a full member (the bot needs `users:read` to detect guest accounts).
+- `not authorized` ➜ check the `ALLOWED_USERS` list in `.env`. Org-level installs require this list; workspace installs can leave it blank to allow all full members.
 - Slack API `ratelimited` / retries ➜ Slack throttles `conversations.join` / `conversations.invite` (roughly ~50 requests/min). The bot automatically honors the `Retry-After` header and will pause/retry up to five times per channel. For large batches (200+ channels) keep the process running until completion.
 - Want to stop the bot? Press `Ctrl+C` in the terminal running `vevn_bot_run.py`.
 

@@ -23,6 +23,7 @@
    - `@SlackAdder list`
    - `@SlackAdder add @TargetBot customers #extra-channel`
      - Bot auto-joins public channels, retries on rate limits, batches replies in the thread.
+   - Optional env: `ALLOWED_USERS=U123ABC` to lock down who can trigger commands (required if app is installed org-wide).
 
 5. **Notes**
    - Commands from guests / shared-channel contexts are ignored.

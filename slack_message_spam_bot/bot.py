@@ -6,7 +6,7 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -29,6 +29,7 @@ USAGE_HELP = (
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
+ALLOWED_USERS_ENV = os.environ.get("ALLOWED_USERS", "")
 
 if not SLACK_BOT_TOKEN:
     raise RuntimeError("SLACK_BOT_TOKEN must be set")
@@ -46,9 +47,22 @@ app = App(**app_kwargs)
 MAX_RATE_LIMIT_RETRIES = 5
 
 try:
-    BOT_USER_ID = app.client.auth_test()["user_id"]
+    auth_info = app.client.auth_test()
+    BOT_USER_ID = auth_info["user_id"]
+    WORKSPACE_TEAM_ID = auth_info.get("team_id")
+    ENTERPRISE_ID = auth_info.get("enterprise_id")
 except SlackApiError as exc:  # pragma: no cover - configuration issue
     raise RuntimeError(f"Failed to verify bot credentials: {exc}") from exc
+
+if ENTERPRISE_ID and not WORKSPACE_TEAM_ID:
+    if not ALLOWED_USERS_ENV.strip():
+        raise RuntimeError(
+            "ALLOWED_USERS must be set (comma-separated user IDs) when running as an org-level app."
+        )
+
+ALLOWED_USERS: Optional[Set[str]] = None
+if ALLOWED_USERS_ENV.strip():
+    ALLOWED_USERS = {user.strip().upper() for user in ALLOWED_USERS_ENV.split(",") if user.strip()}
 
 USER_MENTION_RE = re.compile(r"<@(U[A-Z0-9]+)(?:\|[^>]+)?>")
 
@@ -458,6 +472,10 @@ def handle_app_mention(body, say):  # type: ignore[override]
 
     if not user_id or not channel_id:
         say("Unable to process request: missing user or channel info.", thread_ts=thread_ts)
+        return
+
+    if ALLOWED_USERS is not None and user_id.upper() not in ALLOWED_USERS:
+        say("Sorry, you're not authorized to use SlackAdder.", thread_ts=thread_ts)
         return
 
     is_guest, guest_error_message = _is_guest_user(user_id)
