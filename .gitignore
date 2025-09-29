@@ -1,2 +1,3 @@
 slack_message_spam_bot/.env
+slack_message_spam_bot/channel_groups.json
 slack_message_spam_bot/slack_adder_env/*
